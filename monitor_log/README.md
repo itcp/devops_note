@@ -2,7 +2,7 @@
 
 
 
-- [Prometheus]()
+- [Prometheus](prometheus)
 
   
 
@@ -10,7 +10,7 @@
 
 
 
-- [grafana]()
+- [grafana](grafana)
 
 
 
