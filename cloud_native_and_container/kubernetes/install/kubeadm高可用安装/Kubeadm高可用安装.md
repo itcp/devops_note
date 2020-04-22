@@ -1,3 +1,5 @@
+[TOC]
+
 
 
 ## 基本组件的安装
@@ -210,6 +212,41 @@ KUBELET_EXTRA_ARGS="--cgroup-driver=systemd --pod-infra-container-image=registry
 systemctl daemon-reload
 
 systemctl restart kubelet
+
+
+
+```
+[root@k8s-master01 ~]# systemctl status kubelet
+● kubelet.service - kubelet: The Kubernetes Node Agent
+   Loaded: loaded (/usr/lib/systemd/system/kubelet.service; enabled; vendor preset: disabled)
+  Drop-In: /usr/lib/systemd/system/kubelet.service.d
+           └─10-kubeadm.conf
+   Active: active (running) since Thu 2020-04-02 11:59:54 CST; 1min 2s ago
+     Docs: https://kubernetes.io/docs/
+ Main PID: 9432 (kubelet)
+    Tasks: 16
+   Memory: 33.9M
+   CGroup: /system.slice/kubelet.service
+           └─9432 /usr/bin/kubelet --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf --con...
+
+Apr 02 12:00:33 k8s-master01 kubelet[9432]: E0402 12:00:33.105606    9432 kubelet.go:2172] Container runtime network not ready: NetworkR...tialized
+Apr 02 12:00:34 k8s-master01 kubelet[9432]: W0402 12:00:34.882094    9432 cni.go:213] Unable to update cni config: No networks found in ...ni/net.d
+Apr 02 12:00:38 k8s-master01 kubelet[9432]: E0402 12:00:38.106664    9432 kubelet.go:2172] Container runtime network not ready: NetworkR...tialized
+Apr 02 12:00:39 k8s-master01 kubelet[9432]: W0402 12:00:39.882327    9432 cni.go:213] Unable to update cni config: No networks found in ...ni/net.d
+Apr 02 12:00:43 k8s-master01 kubelet[9432]: E0402 12:00:43.107748    9432 kubelet.go:2172] Container runtime network not ready: NetworkR...tialized
+Apr 02 12:00:44 k8s-master01 kubelet[9432]: W0402 12:00:44.882600    9432 cni.go:213] Unable to update cni config: No networks found in ...ni/net.d
+Apr 02 12:00:48 k8s-master01 kubelet[9432]: E0402 12:00:48.108867    9432 kubelet.go:2172] Container runtime network not ready: NetworkR...tialized
+Apr 02 12:00:49 k8s-master01 kubelet[9432]: W0402 12:00:49.882849    9432 cni.go:213] Unable to update cni config: No networks found in ...ni/net.d
+Apr 02 12:00:53 k8s-master01 kubelet[9432]: E0402 12:00:53.110109    9432 kubelet.go:2172] Container runtime network not ready: NetworkR...tialized
+Apr 02 12:00:54 k8s-master01 kubelet[9432]: W0402 12:00:54.883070    9432 cni.go:213] Unable to update cni config: No networks found in ...ni/net.d
+Hint: Some lines were ellipsized, use -l to show in full.
+[root@k8s-master01 ~]# netstat -tlnup | grep kubelet
+tcp        0      0 127.0.0.1:34561         0.0.0.0:*               LISTEN      9432/kubelet        
+tcp        0      0 127.0.0.1:10248         0.0.0.0:*               LISTEN      9432/kubelet        
+tcp6       0      0 :::10250                :::*                    LISTEN      9432/kubelet
+```
+
+要确认kubelet启动后是这样的状态才是正常的，后面初始化k8s-master才能成功
 
 
 
@@ -1090,6 +1127,46 @@ k8s-master03   NotReady   master   23m   v1.14.10
 
 
 
+```
+[root@k8s-master01 ~]# ipvsadm -ln
+IP Virtual Server version 1.2.1 (size=4096)
+Prot LocalAddress:Port Scheduler Flags
+  -> RemoteAddress:Port           Forward Weight ActiveConn InActConn
+TCP  10.96.0.1:443 rr
+  -> 172.26.130.52:6443           Masq    1      0          0         
+  -> 172.26.130.53:6443           Masq    1      0          0         
+  -> 172.26.130.54:6443           Masq    1      0          0         
+TCP  10.96.0.10:53 rr
+TCP  10.96.0.10:9153 rr
+UDP  10.96.0.10:53 rr
+[root@k8s-master01 ~]# 
+[root@k8s-master01 ~]# kubectl get po -n kube-system
+NAME                                   READY   STATUS    RESTARTS   AGE
+coredns-6547f8b698-8cnhq               0/1     Pending   0          58m
+coredns-6547f8b698-9rh4t               0/1     Pending   0          58m
+etcd-k8s-master01                      1/1     Running   0          56m
+etcd-k8s-master02                      1/1     Running   0          30m
+etcd-k8s-master03                      1/1     Running   0          27m
+kube-apiserver-k8s-master01            1/1     Running   0          57m
+kube-apiserver-k8s-master02            1/1     Running   0          30m
+kube-apiserver-k8s-master03            1/1     Running   0          26m
+kube-controller-manager-k8s-master01   1/1     Running   1          56m
+kube-controller-manager-k8s-master02   1/1     Running   0          30m
+kube-controller-manager-k8s-master03   1/1     Running   0          26m
+kube-proxy-8lj2z                       1/1     Running   0          30m
+kube-proxy-g77gt                       1/1     Running   0          27m
+kube-proxy-ltjvq                       1/1     Running   0          41m
+kube-proxy-wcwk7                       1/1     Running   0          58m
+kube-scheduler-k8s-master01            1/1     Running   1          57m
+kube-scheduler-k8s-master02            1/1     Running   0          30m
+kube-scheduler-k8s-master03            1/1     Running   0          26m
+[root@k8s-master01 ~]# 
+```
+
+
+
+
+
 资源使用情况查看
 
 ```
@@ -1156,16 +1233,95 @@ systemctl status kubelet
 这里的master节点IP要换成原来自己的，不能是HA的虚拟IP
 
 ```
-kubeadm join 172.26.130.52:16443 --token 4nw01b.2r25swzzjugb4gjl \
-    --discovery-token-ca-cert-hash sha256:03394db9f98fd926f9ee0d40ef7bd6cf51331989432c7bf9e4b2c79557cf24c2
+kubeadm join k8s.slb:6443 --token 90s9x8.fgt7u285bpfnrf7r     --discovery-token-ca-cert-hash sha256:a89aab07f477994506c6db8989984d57923f9552d0d9dfcaf780017a84484562 
 ```
 
 ```
-[root@k8s-node01 ~]# kubeadm join 172.26.130.52:16443 --token 4nw01b.2r25swzzjugb4gjl     --discovery-token-ca-cert-hash sha256:03394db9f98fd926f9ee0d40ef7bd6cf51331989432c7bf9e4b2c79557cf24c2
+[root@k8s-node01 ~]# cat /etc/hosts
+::1     localhost       localhost.localdomain   localhost6      localhost6.localdomain6
+127.0.0.1       localhost       localhost.localdomain   localhost4      localhost4.localdomain4
+....
+172.26.130.63 k8s.slb
+[root@k8s-node01 ~]# kubeadm join k8s.slb:6443 --token 90s9x8.fgt7u285bpfnrf7r     --discovery-token-ca-cert-hash sha256:a89aab07f477994506c6db8989984d57923f9552d0d9dfcaf780017a84484562 
 [preflight] Running pre-flight checks
 [preflight] Reading configuration from the cluster...
 [preflight] FYI: You can look at this config file with 'kubectl -n kube-system get cm kubeadm-config -oyaml'
-error execution phase preflight: unable to fetch the kubeadm-config ConfigMap: failed to get config map: Get https://172.26.130.51:16443/api/v1/namespaces/kube-system/configmaps/kubeadm-config: dial tcp 172.26.130.51:16443: i/o timeout
+[kubelet-start] Downloading configuration for the kubelet from the "kubelet-config-1.14" ConfigMap in the kube-system namespace
+[kubelet-start] Writing kubelet configuration to file "/var/lib/kubelet/config.yaml"
+[kubelet-start] Writing kubelet environment file with flags to file "/var/lib/kubelet/kubeadm-flags.env"
+[kubelet-start] Activating the kubelet service
+[kubelet-start] Waiting for the kubelet to perform the TLS Bootstrap...
+
+This node has joined the cluster:
+* Certificate signing request was sent to apiserver and a response was received.
+* The Kubelet was informed of the new secure connection details.
+
+Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
+
+[root@k8s-node01 ~]#
+```
+
+
+
+查看节点
+
+```
+[root@k8s-master01 ~]# kubectl get nodes
+NAME           STATUS     ROLES    AGE     VERSION
+k8s-master01   NotReady   master   33m     v1.14.10
+k8s-master02   NotReady   master   4m41s   v1.14.10
+k8s-master03   NotReady   master   2m28s   v1.14.10
+k8s-node01     NotReady   <none>   15m     v1.14.10
+[root@k8s-master01 ~]# 
+```
+
+
+
+使用资源情况
+
+```
+[root@k8s-node01 ~]# free -h
+              total        used        free      shared  buff/cache   available
+Mem:           3.7G        183M        3.0G        860K        518M        3.3G
+Swap:            0B          0B          0B
+[root@k8s-node01 ~]# top
+top - 13:06:45 up  2:05,  1 user,  load average: 0.03, 0.04, 0.00
+Tasks:  87 total,   1 running,  48 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  0.5 us,  0.3 sy,  0.0 ni, 99.2 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+KiB Mem :  3847856 total,  3128184 free,   188320 used,   531352 buff/cache
+KiB Swap:        0 total,        0 free,        0 used.  3445964 avail Mem 
+
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND                                                                        
+ 1236 root      10 -10  126944  19272  13584 S   1.0  0.5   1:23.69 AliYunDun                                                                      
+ 6364 root      20   0  943672  91648  59744 S   0.7  2.4   0:20.70 kubelet                                                                        
+ 1212 root      20   0  747340  52860  27392 S   0.3  1.4   0:10.37 dockerd-current                                                                
+    1 root      20   0   43544   5280   3936 S   0.0  0.1   0:01.84 systemd                                                                        
+    2 root      20   0       0      0      0 S   0.0  0.0   0:00.00 kthreadd                                                                       
+    3 root       0 -20       0      0      0 I   0.0  0.0   0:00.00 rcu_gp                                                                         
+    4 root       0 -20       0      0      0 I   0.0  0.0   0:00.00 rcu_par_gp                                                                     
+    6 root       0 -20       0      0      0 I   0.0  0.0   0:00.00 kworker/0:0H-kb                                                                
+    8 root       0 -20       0      0      0 I   0.0  0.0   0:00.00 mm_percpu_wq                                                                   
+    9 root      20   0       0      0      0 S   0.0  0.0   0:00.03 ksoftirqd/0                                                                    
+   10 root      20   0       0      0      0 I   0.0  0.0   0:01.27 rcu_sched                                                                      
+   11 root      20   0       0      0      0 I   0.0  0.0   0:00.00 rcu_bh                                                                         
+   12 root      rt   0       0      0      0 S   0.0  0.0   0:00.03 migration/0                                                                    
+   14 root      20   0       0      0      0 S   0.0  0.0   0:00.00 cpuhp/0                                                                        
+   15 root      20   0       0      0      0 S   0.0  0.0   0:00.00 cpuhp/1                                                                        
+   16 root      rt   0       0      0      0 S   0.0  0.0   0:00.03 migration/1                                                                    
+   17 root      20   0       0      0      0 S   0.0  0.0   0:00.03 ksoftirqd/1                                                                    
+   19 root       0 -20       0      0      0 I   0.0  0.0   0:00.00 kworker/1:0H-kb                                                                
+   20 root      20   0       0      0      0 S   0.0  0.0   0:00.00 kdevtmpfs                                                                      
+   21 root       0 -20       0      0      0 I   0.0  0.0   0:00.00 netns                                                                          
+   22 root      20   0       0      0      0 S   0.0  0.0   0:00.02 kauditd                                                                        
+   23 root      20   0       0      0      0 S   0.0  0.0   0:00.00 khungtaskd                                                                     
+   24 root      20   0       0      0      0 S   0.0  0.0   0:00.00 oom_reaper                                                                     
+   25 root       0 -20       0      0      0 I   0.0  0.0   0:00.00 writeback                                                                      
+   26 root      20   0       0      0      0 S   0.0  0.0   0:00.00 kcompactd0                                                                     
+   27 root      25   5       0      0      0 S   0.0  0.0   0:00.00 ksmd                                                                           
+   28 root      39  19       0      0      0 S   0.0  0.0   0:00.02 khugepaged                                                                     
+   29 root       0 -20       0      0      0 I   0.0  0.0   0:00.00 crypto                                                                         
+   30 root       0 -20       0      0      0 I   0.0  0.0   0:00.00 kintegrityd                                                                    
+   31 root       0 -20       0      0      0 I   0.0  0.0   0:00.00 kblockd                                                                        
 [root@k8s-node01 ~]# 
 ```
 

@@ -177,7 +177,7 @@ mv /data/jenkins/worksqace/ios/${x}/*.ipa /data/jenkins/worksqace/ios/ipa/${x}.i
 cp ${work_all}/ios_app_conf/Template/download.plist /data/jenkins/worksqace/ios/plist/${x}.plist
 sed -i "" 's#https://ios.viba.work/t08.ipa#https://ios.viba.work/ipa/'${x}'.ipa#g' /data/jenkins/worksqace/ios/plist/${x}.plist
 sed -i "" 's#com.zoozv.uat#'${CFBundleIdentifier}'#g' /data/jenkins/worksqace/ios/plist/${x}.plist
-sed -i "" 's#彩票-uat#'${CFBundleDisplayName}'#g' /data/jenkins/worksqace/ios/plist/${x}.plist
+sed -i "" 's#手淘网-uat#'${CFBundleDisplayName}'#g' /data/jenkins/worksqace/ios/plist/${x}.plist
 
 # 生成下载页面
 curl https://ipa.viba.work/ > index.html
