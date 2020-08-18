@@ -6,11 +6,11 @@
 
 ## 1.计算资源和配置管理
 
-- [Terraform]()
+- [Terraform](resource_config/terraform)
 
 
 
-- [Ansible]()
+- [Ansible](resource_config/ansible)
 
 
 
@@ -22,15 +22,15 @@
 
 
 
-- [docker]()
+- [docker](cloud_native_and_container/docker)
 
 
 
-- [kubernetes]()
+- [kubernetes](cloud_native_and_container/kubernetes)
 
 
 
-- [Service Mesh & Istio]()
+- [Service Mesh & Istio]
 
 
 
@@ -42,11 +42,11 @@
 
 
 
-- [Heartbeat+Keepalived]()
+- [Heartbeat+Keepalived]
 
 
 
-- [corosync + pacemaker]()
+- [corosync + pacemaker]
 
 
 
@@ -56,11 +56,9 @@
 
 ## 4.构建与部署
 
-- [jenkins]()
+- [jenkins](build_deploy/jenkins)
 
 
-
-- [rundeck]()
 
 
 
@@ -72,15 +70,15 @@
 
 
 
-- [Prometheus]()
+- [Prometheus](monitor_log/prometheus)
 
   
 
-- [ELK]()
+- [ELK](monitor_log/ELK)
 
 
 
-- [grafana]()
+- [grafana](monitor_log/grafana)
 
 
 
